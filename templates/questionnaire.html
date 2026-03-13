@@ -1,0 +1,246 @@
+{% extends "base.html" %}
+{% block title %}Questionnaire - Student Mental Stress Analysis{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="card shadow">
+            <div class="card-header bg-theme-primary text-white py-3">
+                <h4 class="mb-0"><i class="bi bi-clipboard2-pulse me-2"></i>Stress Assessment Questionnaire</h4>
+                <p class="mb-0 mt-2 small opacity-90">Please answer honestly. Your responses help assess your stress level.</p>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST" action="{{ url_for('questionnaire') }}" id="stressForm">
+                    <div class="row g-3">
+                        <!-- Anxiety Level -->
+                        <div class="col-md-6">
+                            <label class="form-label">On a scale of 1–5, how often do you feel anxious or worried? <span class="text-danger">*</span></label>
+                            <select name="anxiety_level" class="form-select" required>
+                                <option value="">Select...</option>
+                                <option value="1">1 - Rarely</option>
+                                <option value="2">2 - Sometimes</option>
+                                <option value="3">3 - Moderately</option>
+                                <option value="4">4 - Often</option>
+                                <option value="5">5 - Very Often</option>
+                            </select>
+                        </div>
+
+                        <!-- Self Esteem -->
+                        <div class="col-md-6">
+                            <label class="form-label">How would you rate your self-confidence? <span class="text-danger">*</span></label>
+                            <select name="self_esteem" class="form-select" required>
+                                <option value="">Select...</option>
+                                <option value="low">Low</option>
+                                <option value="medium">Medium</option>
+                                <option value="high">High</option>
+                            </select>
+                        </div>
+
+                        <!-- Mental Health History -->
+                        <div class="col-md-6">
+                            <label class="form-label">Do you have any previous mental health issues? <span class="text-danger">*</span></label>
+                            <select name="mental_health_history" class="form-select" required>
+                                <option value="">Select...</option>
+                                <option value="no">No</option>
+                                <option value="yes">Yes</option>
+                            </select>
+                        </div>
+
+                        <!-- Depression -->
+                        <div class="col-md-6">
+                            <label class="form-label">Do you often feel sad or hopeless? (1–5 scale) <span class="text-danger">*</span></label>
+                            <select name="depression" class="form-select" required>
+                                <option value="">Select...</option>
+                                <option value="1">1 - Never</option>
+                                <option value="2">2 - Rarely</option>
+                                <option value="3">3 - Sometimes</option>
+                                <option value="4">4 - Often</option>
+                                <option value="5">5 - Very Often</option>
+                            </select>
+                        </div>
+
+                        <!-- Headache -->
+                        <div class="col-md-6">
+                            <label class="form-label">How frequently do you experience headaches? <span class="text-danger">*</span></label>
+                            <select name="headache" class="form-select" required>
+                                <option value="">Select...</option>
+                                <option value="never">Never</option>
+                                <option value="sometimes">Sometimes</option>
+                                <option value="often">Often</option>
+                            </select>
+                        </div>
+
+                        <!-- Blood Pressure -->
+                        <div class="col-md-6">
+                            <label class="form-label">Have you experienced high or abnormal blood pressure recently? <span class="text-danger">*</span></label>
+                            <select name="blood_pressure" class="form-select" required>
+                                <option value="">Select...</option>
+                                <option value="no">No</option>
+                                <option value="yes">Yes</option>
+                            </select>
+                        </div>
+
+                        <!-- Sleep Quality -->
+                        <div class="col-md-6">
+                            <label class="form-label">How would you rate your sleep quality? <span class="text-danger">*</span></label>
+                            <select name="sleep_quality" class="form-select" required>
+                                <option value="">Select...</option>
+                                <option value="poor">Poor</option>
+                                <option value="average">Average</option>
+                                <option value="good">Good</option>
+                            </select>
+                        </div>
+
+                        <!-- Breathing Problem -->
+                        <div class="col-md-6">
+                            <label class="form-label">Do you experience shortness of breath during stress? <span class="text-danger">*</span></label>
+                            <select name="breathing_problem" class="form-select" required>
+                                <option value="">Select...</option>
+                                <option value="no">No</option>
+                                <option value="yes">Yes</option>
+                            </select>
+                        </div>
+
+                        <!-- Noise Level -->
+                        <div class="col-md-6">
+                            <label class="form-label">Is your study/living environment noisy? <span class="text-danger">*</span></label>
+                            <select name="noise_level" class="form-select" required>
+                                <option value="">Select...</option>
+                                <option value="low">Low</option>
+                                <option value="medium">Medium</option>
+                                <option value="high">High</option>
+                            </select>
+                        </div>
+
+                        <!-- Living Conditions -->
+                        <div class="col-md-6">
+                            <label class="form-label">How comfortable is your current living condition? <span class="text-danger">*</span></label>
+                            <select name="living_conditions" class="form-select" required>
+                                <option value="">Select...</option>
+                                <option value="poor">Poor</option>
+                                <option value="average">Average</option>
+                                <option value="good">Good</option>
+                            </select>
+                        </div>
+
+                        <!-- Safety -->
+                        <div class="col-md-6">
+                            <label class="form-label">Do you feel safe in your surroundings? <span class="text-danger">*</span></label>
+                            <select name="safety" class="form-select" required>
+                                <option value="">Select...</option>
+                                <option value="yes">Yes</option>
+                                <option value="no">No</option>
+                            </select>
+                        </div>
+
+                        <!-- Basic Needs -->
+                        <div class="col-md-6">
+                            <label class="form-label">Are your basic needs (food, water, internet) fulfilled properly? <span class="text-danger">*</span></label>
+                            <select name="basic_needs" class="form-select" required>
+                                <option value="">Select...</option>
+                                <option value="yes">Yes</option>
+                                <option value="no">No</option>
+                            </select>
+                        </div>
+
+                        <!-- Academic Performance -->
+                        <div class="col-md-6">
+                            <label class="form-label">How would you rate your academic performance? <span class="text-danger">*</span></label>
+                            <select name="academic_performance" class="form-select" required>
+                                <option value="">Select...</option>
+                                <option value="poor">Poor</option>
+                                <option value="average">Average</option>
+                                <option value="good">Good</option>
+                            </select>
+                        </div>
+
+                        <!-- Study Load -->
+                        <div class="col-md-6">
+                            <label class="form-label">How heavy is your academic workload? <span class="text-danger">*</span></label>
+                            <select name="study_load" class="form-select" required>
+                                <option value="">Select...</option>
+                                <option value="low">Low</option>
+                                <option value="medium">Medium</option>
+                                <option value="high">High</option>
+                            </select>
+                        </div>
+
+                        <!-- Teacher-Student Relationship -->
+                        <div class="col-md-6">
+                            <label class="form-label">How supportive are your teachers? <span class="text-danger">*</span></label>
+                            <select name="teacher_student_relationship" class="form-select" required>
+                                <option value="">Select...</option>
+                                <option value="poor">Poor</option>
+                                <option value="average">Average</option>
+                                <option value="good">Good</option>
+                            </select>
+                        </div>
+
+                        <!-- Future Career Concerns -->
+                        <div class="col-md-6">
+                            <label class="form-label">Are you worried about your future career? (1–5 scale) <span class="text-danger">*</span></label>
+                            <select name="future_career_concerns" class="form-select" required>
+                                <option value="">Select...</option>
+                                <option value="1">1 - Not at all</option>
+                                <option value="2">2 - Slightly</option>
+                                <option value="3">3 - Moderately</option>
+                                <option value="4">4 - Quite a bit</option>
+                                <option value="5">5 - Very much</option>
+                            </select>
+                        </div>
+
+                        <!-- Social Support -->
+                        <div class="col-md-6">
+                            <label class="form-label">Do you have supportive friends/family? <span class="text-danger">*</span></label>
+                            <select name="social_support" class="form-select" required>
+                                <option value="">Select...</option>
+                                <option value="low">Low</option>
+                                <option value="medium">Medium</option>
+                                <option value="high">High</option>
+                            </select>
+                        </div>
+
+                        <!-- Peer Pressure -->
+                        <div class="col-md-6">
+                            <label class="form-label">Do you feel pressure from peers? <span class="text-danger">*</span></label>
+                            <select name="peer_pressure" class="form-select" required>
+                                <option value="">Select...</option>
+                                <option value="low">Low</option>
+                                <option value="medium">Medium</option>
+                                <option value="high">High</option>
+                            </select>
+                        </div>
+
+                        <!-- Extracurricular Activities -->
+                        <div class="col-md-6">
+                            <label class="form-label">Are you involved in extracurricular activities? <span class="text-danger">*</span></label>
+                            <select name="extracurricular_activities" class="form-select" required>
+                                <option value="">Select...</option>
+                                <option value="no">No</option>
+                                <option value="yes">Yes</option>
+                            </select>
+                        </div>
+
+                        <!-- Bullying -->
+                        <div class="col-md-6">
+                            <label class="form-label">Have you experienced bullying? <span class="text-danger">*</span></label>
+                            <select name="bullying" class="form-select" required>
+                                <option value="">Select...</option>
+                                <option value="never">Never</option>
+                                <option value="sometimes">Sometimes</option>
+                                <option value="often">Often</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 text-center">
+                        <button type="submit" class="btn btn-primary btn-lg px-5">
+                            <i class="bi bi-graph-up me-2"></i>Get Stress Analysis
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

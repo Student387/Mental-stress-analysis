@@ -1,0 +1,207 @@
+/* Student Mental Stress Analysis System - Custom Styles */
+/* Formal theme: Blue + Soft Green */
+
+:root {
+    --primary-color: #1e5a8e;
+    --primary-hover: #164a75;
+    --success-color: #2d8a5e;
+    --success-light: #d4edda;
+    --warning-color: #e6a23c;
+    --danger-color: #dc3545;
+    --theme-dark: #1a3a52;
+    --theme-muted: #5a6c7d;
+    --bg-light: #f8fafb;
+}
+
+/* Navbar */
+.bg-theme-primary {
+    background: linear-gradient(135deg, #1e5a8e 0%, #2d7ab8 100%) !important;
+}
+
+.navbar-brand {
+    font-weight: 600;
+}
+
+.nav-link:hover {
+    opacity: 0.9;
+}
+
+/* Buttons */
+.btn-primary {
+    background: linear-gradient(135deg, #1e5a8e 0%, #2d7ab8 100%);
+    border: none;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #164a75 0%, #1e5a8e 100%);
+    border: none;
+}
+
+.btn-outline-theme {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-outline-theme:hover {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+/* Theme utility classes */
+.text-theme-primary { color: var(--primary-color) !important; }
+.text-theme-success { color: var(--success-color) !important; }
+.text-theme-dark { color: var(--theme-dark) !important; }
+.text-theme-muted { color: var(--theme-muted) !important; }
+
+.bg-theme-primary-subtle { background-color: rgba(30, 90, 142, 0.12); }
+.bg-theme-success-subtle { background-color: rgba(45, 138, 94, 0.12); }
+
+/* Body & Layout */
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-light);
+}
+
+main {
+    flex: 1;
+}
+
+/* Cards */
+.card {
+    border-radius: 0.5rem;
+    transition: box-shadow 0.2s ease;
+}
+
+.card:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.08) !important;
+}
+
+.feature-card:hover {
+    transform: translateY(-2px);
+    transition: transform 0.2s ease;
+}
+
+/* Hero Section */
+.hero-section {
+    background: linear-gradient(180deg, #fff 0%, #f0f7fc 100%);
+}
+
+.hero-title {
+    color: var(--theme-dark);
+    line-height: 1.2;
+}
+
+.hero-subtitle {
+    color: var(--theme-muted);
+}
+
+.hero-image-placeholder img,
+.about-image img {
+    object-fit: cover;
+}
+
+/* Footer */
+.footer-custom {
+    background: linear-gradient(135deg, #1e5a8e 0%, #1a3a52 100%);
+}
+
+.text-footer-muted {
+    color: rgba(255, 255, 255, 0.75);
+}
+
+/* Forms */
+.form-select:focus,
+.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(30, 90, 142, 0.2);
+}
+
+/* Stress Badge */
+.stress-badge {
+    border-radius: 0.5rem;
+}
+
+/* Confidence Ring */
+.confidence-ring {
+    position: relative;
+    width: 80px;
+    height: 80px;
+}
+
+.confidence-ring svg {
+    transform: rotate(-90deg);
+    width: 100%;
+    height: 100%;
+}
+
+.confidence-bg {
+    fill: none;
+    stroke: #e9ecef;
+    stroke-width: 3;
+}
+
+.confidence-fill {
+    fill: none;
+    stroke: var(--primary-color);
+    stroke-width: 3;
+    stroke-linecap: round;
+    transition: stroke-dasharray 0.5s ease;
+}
+
+.confidence-value {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+/* Stress Meter (Dashboard) */
+.stress-meter {
+    width: 120px;
+    height: 24px;
+    background: linear-gradient(90deg, #28a745 0%, #ffc107 50%, #dc3545 100%);
+    border-radius: 12px;
+    position: relative;
+    overflow: hidden;
+}
+
+.stress-meter .meter-fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 33.33%;
+    transition: width 0.3s ease;
+}
+
+.stress-meter[data-level="0"] .meter-fill { width: 33%; background: rgba(40, 167, 69, 0.5); }
+.stress-meter[data-level="1"] .meter-fill { width: 66%; background: rgba(255, 193, 7, 0.5); }
+.stress-meter[data-level="2"] .meter-fill { width: 100%; background: rgba(220, 53, 69, 0.5); }
+
+.stress-meter .meter-labels {
+    position: absolute;
+    bottom: -18px;
+    left: 0;
+    right: 0;
+    font-size: 0.65rem;
+    color: var(--theme-muted);
+    display: flex;
+    justify-content: space-between;
+}
+
+/* Section Titles */
+.section-title {
+    color: var(--theme-dark);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .hero-title {
+        font-size: 1.75rem;
+    }
+}

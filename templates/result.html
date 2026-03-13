@@ -1,0 +1,289 @@
+{% extends "base.html" %}
+{% block title %}Result - Student Mental Stress Analysis{% endblock %}
+
+{% block content %}
+{% set analysis = analysis or {'contributing_factors': ['Assessment factors'], 'increasing_stress': [], 'reducing_stress': []} %}
+
+<div class="row justify-content-center">
+    <div class="col-lg-10 col-xl-9">
+
+        {% if stress_change %}
+        <div class="card shadow-sm mb-4 {% if stress_change.trend == 'decreased' %}border-success{% elif stress_change.trend == 'increased' %}border-danger{% else %}border-secondary{% endif %}">
+            <div class="card-header {% if stress_change.trend == 'decreased' %}bg-success text-white{% elif stress_change.trend == 'increased' %}bg-danger text-white{% else %}bg-secondary text-white{% endif %} py-3">
+                <h5 class="mb-0">
+                    {% if stress_change.trend == 'decreased' %}<i class="bi bi-arrow-down-circle me-2"></i>Stress Decreased
+                    {% elif stress_change.trend == 'increased' %}<i class="bi bi-arrow-up-circle me-2"></i>Stress Increased
+                    {% else %}<i class="bi bi-dash-circle me-2"></i>Stress Level Same
+                    {% endif %}
+                </h5>
+            </div>
+            <div class="card-body p-4">
+                {% if stress_change.improved_features %}
+                <h6 class="text-success">Improved</h6>
+                <ul class="mb-3">
+                    {% for f in stress_change.improved_features %}
+                    <li>{{ f }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+                {% if stress_change.worsened_features %}
+                <h6 class="text-danger">Worsened</h6>
+                <ul class="mb-3">
+                    {% for f in stress_change.worsened_features %}
+                    <li>{{ f }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+                {% if stress_change.what_helped %}
+                <h6 class="text-theme-primary">What Helped</h6>
+                <ul class="mb-0">
+                    {% for f in stress_change.what_helped %}
+                    <li>{{ f }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Stress Level Badge -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-body text-center p-4 p-md-5">
+                <h4 class="text-theme-muted small text-uppercase mb-3">Your Stress Level</h4>
+
+                <span class="stress-badge badge fs-4 px-4 py-3
+                    {% if stress_level == 'Low' %}bg-success
+                    {% elif stress_level == 'Medium' %}bg-warning text-dark
+                    {% else %}bg-danger
+                    {% endif %}">
+                    <i class="bi bi-{% if stress_level == 'Low' %}emoji-smile{% elif stress_level == 'Medium' %}emoji-neutral{% else %}emoji-frown{% endif %} me-2"></i>
+                    {{ stress_level }}
+                </span>
+            </div>
+        </div>
+
+        <!-- Probability Bar Chart -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white border-bottom py-3">
+                <h5 class="mb-0">
+                    <i class="bi bi-bar-chart-fill text-theme-primary me-2"></i>
+                    Probability Distribution
+                </h5>
+                <p class="text-theme-muted small mb-0 mt-1">
+                    Model probabilities for each stress level
+                </p>
+            </div>
+            <div class="card-body p-4">
+                <div class="chart-container" style="position: relative; height: 220px;">
+                    <canvas id="probabilityChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Analysis Summary -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white border-bottom py-3">
+                <h5 class="mb-0">
+                    <i class="bi bi-search text-theme-primary me-2"></i>
+                    Detailed Analysis Summary
+                </h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="row g-4">
+
+                    <div class="col-md-4">
+                        <h6 class="text-theme-primary border-bottom pb-2 mb-3">
+                            Contributing Factors
+                        </h6>
+                        <ul class="list-unstyled mb-0">
+                            {% for f in analysis.contributing_factors %}
+                            <li class="mb-2">
+                                <i class="bi bi-arrow-right-circle-fill text-theme-primary me-2 small"></i>
+                                {{ f }}
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+
+                    <div class="col-md-4">
+                        <h6 class="text-danger border-bottom pb-2 mb-3">
+                            May Increase Stress
+                        </h6>
+                        <ul class="list-unstyled mb-0">
+                            {% for f in analysis.increasing_stress %}
+                            <li class="mb-2">
+                                <i class="bi bi-exclamation-triangle-fill text-warning me-2 small"></i>
+                                {{ f }}
+                            </li>
+                            {% endfor %}
+                            {% if not analysis.increasing_stress %}
+                            <li class="text-theme-muted small">None identified</li>
+                            {% endif %}
+                        </ul>
+                    </div>
+
+                    <div class="col-md-4">
+                        <h6 class="text-success border-bottom pb-2 mb-3">
+                            May Reduce Stress
+                        </h6>
+                        <ul class="list-unstyled mb-0">
+                            {% for f in analysis.reducing_stress %}
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle-fill text-success me-2 small"></i>
+                                {{ f }}
+                            </li>
+                            {% endfor %}
+                            {% if not analysis.reducing_stress %}
+                            <li class="text-theme-muted small">None identified</li>
+                            {% endif %}
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Precautions -->
+        <div class="card shadow-sm border-warning mb-4">
+            <div class="card-header bg-warning bg-opacity-10 border-warning py-3">
+                <h5 class="mb-0">
+                    <i class="bi bi-shield-exclamation text-warning me-2"></i>
+                    Precautions
+                </h5>
+            </div>
+            <div class="card-body p-4">
+                <ul class="mb-0">
+                    <li class="mb-2">
+                        This assessment is for informational purposes only. <strong>Avoid self-diagnosis.</strong>
+                    </li>
+                    <li class="mb-2">
+                        <strong>Seek professional help</strong> if symptoms persist or interfere with daily life.
+                    </li>
+                    <li class="mb-2">
+                        Maintain a healthy routine including proper sleep, balanced nutrition, and physical activity.
+                    </li>
+
+                    {% if stress_level == 'High' %}
+                    <li class="text-danger fw-semibold">
+                        <i class="bi bi-telephone-fill me-2"></i>
+                        Crisis helpline: Contact your nearest mental health support center or emergency services.
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+
+        <!-- Personalized Recommendations -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-theme-primary text-white py-3">
+                <h5 class="mb-0">
+                    <i class="bi bi-lightbulb me-2"></i>
+                    Personalized Recommendations
+                </h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="row g-3">
+                    {% for sol in solutions %}
+                    <div class="col-md-6">
+                        <div class="card h-100 border">
+                            <div class="card-body">
+                                <h6 class="card-title">
+                                    <i class="bi {{ sol.icon }} text-theme-primary me-2"></i>
+                                    {{ sol.title }}
+                                </h6>
+                                <p class="card-text text-theme-muted small mb-0">
+                                    {{ sol.description }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="mt-4 pt-3 border-top">
+                    <h6 class="mb-3">Explore More Resources</h6>
+                    <div class="d-flex flex-wrap gap-2">
+                        <a href="{{ url_for('recommendation', topic='meditation') }}" class="btn btn-outline-theme btn-sm">Meditation</a>
+                        <a href="{{ url_for('recommendation', topic='study-planning') }}" class="btn btn-outline-theme btn-sm">Study Planning</a>
+                        <a href="{{ url_for('recommendation', topic='sleep-improvement') }}" class="btn btn-outline-theme btn-sm">Sleep Improvement</a>
+                        <a href="{{ url_for('recommendation', topic='personal-support') }}" class="btn btn-outline-theme btn-sm">Personal Support</a>
+                        <a href="{{ url_for('recommendation', topic='emergency-help') }}" class="btn btn-outline-danger btn-sm">Emergency Help</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="d-flex flex-wrap gap-3 justify-content-center mb-4">
+            <a href="{{ url_for('download_report') }}" class="btn btn-primary px-4">
+                <i class="bi bi-download me-2"></i>Download Report
+            </a>
+            <a href="{{ url_for('dashboard') }}" class="btn btn-outline-theme px-4">
+                <i class="bi bi-speedometer2 me-2"></i>Dashboard
+            </a>
+            <a href="{{ url_for('questionnaire') }}" class="btn btn-outline-secondary px-4">
+                <i class="bi bi-arrow-repeat me-2"></i>Retake Assessment
+            </a>
+            <a href="{{ url_for('index') }}" class="btn btn-outline-secondary px-4">
+                <i class="bi bi-house me-2"></i>Home
+            </a>
+        </div>
+
+        <p class="text-center text-theme-muted small">
+            Report generated: {{ timestamp }}
+        </p>
+
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('probabilityChart').getContext('2d');
+    const data = {{ probabilities | tojson }};
+    const labels = Object.keys(data);
+    const values = Object.values(data);
+
+    const colors = {
+        'Low': 'rgba(25, 135, 84, 0.85)',
+        'Medium': 'rgba(255, 193, 7, 0.85)',
+        'High': 'rgba(220, 53, 69, 0.85)'
+    };
+
+    const bgColors = labels.map(k => colors[k] || '#6c757d');
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: values,
+                backgroundColor: bgColors,
+                borderColor: bgColors.map(c => c.replace('0.85', '1')),
+                borderWidth: 1
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: (ctx) => ctx.raw + '%'
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    min: 0,
+                    max: 100,
+                    ticks: { callback: v => v + '%' }
+                }
+            }
+        }
+    });
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - Student Mental Stress Analysis{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-11">
+        <h2 class="mb-4"><i class="bi bi-speedometer2 text-theme-primary me-2"></i>Assessment Dashboard</h2>
+
+        <div class="row g-4 mb-4">
+            <div class="col-md-4">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-body p-4">
+                        <h5 class="text-theme-muted small text-uppercase mb-3">Latest Stress Level</h5>
+                        <span class="badge fs-5
+                            {% if stress_level == 'Low' %}bg-success
+                            {% elif stress_level == 'Medium' %}bg-warning text-dark
+                            {% else %}bg-danger
+                            {% endif %}">{{ stress_level }}</span>
+                        <p class="text-theme-muted small mb-0 mt-2">Confidence: {{ confidence }}%</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-body p-4">
+                        <h5 class="text-theme-muted small text-uppercase mb-3">Previous Stress Level</h5>
+                        {% if assessments and assessments|length > 1 %}
+                        <span class="badge fs-5 bg-secondary">{{ assessments[1].stress_level }}</span>
+                        {% else %}
+                        <span class="text-theme-muted">No previous</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-body p-4">
+                        <h5 class="text-theme-muted small text-uppercase mb-3">Probability Chart</h5>
+                        <div style="height: 140px;">
+                            <canvas id="probChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-4">
+            <div class="col-lg-8">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-white border-bottom py-3">
+                        <h5 class="mb-0">Stress Trend</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div style="height: 220px;">
+                            <canvas id="trendChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-white border-bottom py-3">
+                        <h5 class="mb-0">Feature Radar</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div style="height: 220px;">
+                            <canvas id="radarChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white border-bottom py-3">
+                <h5 class="mb-0">Assessment History</h5>
+            </div>
+            <div class="card-body p-0">
+                {% if assessments %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Stress Level</th>
+                                <th>Confidence</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for a in assessments %}
+                            <tr>
+                                <td>{{ a.created_at }}</td>
+                                <td>
+                                    <span class="badge {% if a.stress_level == 'Low' %}bg-success{% elif a.stress_level == 'Medium' %}bg-warning text-dark{% else %}bg-danger{% endif %}">
+                                        {{ a.stress_level }}
+                                    </span>
+                                </td>
+                                <td>{{ a.confidence }}%</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="p-4 text-theme-muted mb-0">No assessment history yet.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="d-flex flex-wrap gap-3 mb-4">
+            <a href="{{ url_for('download_report') }}" class="btn btn-primary">Download Report</a>
+            <a href="{{ url_for('questionnaire') }}" class="btn btn-outline-theme">Take Assessment</a>
+            <a href="{{ url_for('admin') }}" class="btn btn-outline-secondary">Model Performance</a>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const probData = {{ (probabilities or {}) | tojson }};
+    if (Object.keys(probData).length) {
+        const ctx = document.getElementById('probChart').getContext('2d');
+        const colors = {'Low': 'rgba(25, 135, 84, 0.8)', 'Medium': 'rgba(255, 193, 7, 0.8)', 'High': 'rgba(220, 53, 69, 0.8)'};
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(probData),
+                datasets: [{ data: Object.values(probData), backgroundColor: Object.keys(probData).map(k => colors[k] || '#6c757d'), borderWidth: 2, borderColor: '#fff' }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+        });
+    }
+
+    const assessments = {{ (assessments or []) | tojson }};
+    if (assessments.length > 1) {
+        const reversed = [...assessments].reverse();
+        const trendCtx = document.getElementById('trendChart').getContext('2d');
+        new Chart(trendCtx, {
+            type: 'line',
+            data: {
+                labels: reversed.map((a, i) => (i + 1).toString()),
+                datasets: [{
+                    label: 'Stress Level (0=Low, 1=Med, 2=High)',
+                    data: reversed.map(a => a.stress_code),
+                    borderColor: '#1e5a8e',
+                    backgroundColor: 'rgba(30, 90, 142, 0.1)',
+                    fill: true,
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { min: 0, max: 2, ticks: { callback: v => ['Low','Med','High'][v] } }
+                }
+            }
+        });
+    } else if (assessments.length === 1) {
+        const trendCtx = document.getElementById('trendChart').getContext('2d');
+        new Chart(trendCtx, {
+            type: 'line',
+            data: {
+                labels: ['1'],
+                datasets: [{ label: 'Stress', data: [assessments[0].stress_code], borderColor: '#1e5a8e', tension: 0.3 }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, scales: { y: { min: 0, max: 2 } } }
+        });
+    }
+
+    const latest = assessments[0];
+    if (latest && latest.responses) {
+        const r = latest.responses;
+        const radarLabels = ['Sleep', 'Study Load', 'Social', 'Anxiety', 'Mood', 'Support'];
+        const getVal = (k, d) => {
+            const v = String((r[k] || d)).toLowerCase();
+            if (k === 'sleep_quality') return v === 'good' ? 100 : v === 'average' ? 60 : 20;
+            if (k === 'study_load') return v === 'high' ? 20 : v === 'medium' ? 60 : 100;
+            if (k === 'social_support') return v === 'high' ? 100 : v === 'medium' ? 60 : 20;
+            if (k === 'anxiety_level') return (5 - (parseInt(r[k]) || 3)) * 25;
+            if (k === 'depression') return (5 - (parseInt(r[k]) || 3)) * 25;
+            if (k === 'teacher_student_relationship') return v === 'good' ? 100 : v === 'average' ? 60 : 20;
+            return 50;
+        };
+        const radarData = [
+            getVal('sleep_quality', 'average'),
+            getVal('study_load', 'medium'),
+            getVal('social_support', 'medium'),
+            getVal('anxiety_level', 3),
+            getVal('depression', 3),
+            getVal('teacher_student_relationship', 'average')
+        ];
+        const radarCtx = document.getElementById('radarChart').getContext('2d');
+        new Chart(radarCtx, {
+            type: 'radar',
+            data: {
+                labels: radarLabels,
+                datasets: [{ label: 'Wellness', data: radarData, fill: true, backgroundColor: 'rgba(30, 90, 142, 0.2)', borderColor: '#1e5a8e' }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, scales: { r: { min: 0, max: 100 } } }
+        });
+    }
+});
+</script>
+{% endblock %}

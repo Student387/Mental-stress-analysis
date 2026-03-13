@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Admin - Model Performance{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <h2 class="mb-4"><i class="bi bi-speedometer2 text-theme-primary me-2"></i>Model Performance</h2>
+        {% if metrics %}
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white py-3">
+                <h5 class="mb-0">Latest Retrain Metrics</h5>
+                <small class="text-theme-muted">Last updated: {{ metrics.created_at }}</small>
+            </div>
+            <div class="card-body p-4">
+                <p class="mb-3"><strong>Model:</strong> {{ metrics.model_name }}</p>
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h6 class="text-theme-muted">Accuracy</h6>
+                                <h4>{{ "%.1f"|format(metrics.accuracy) }}%</h4>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h6 class="text-theme-muted">Precision</h6>
+                                <h4>{{ "%.1f"|format(metrics.precision) }}%</h4>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h6 class="text-theme-muted">Recall</h6>
+                                <h4>{{ "%.1f"|format(metrics.recall) }}%</h4>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h6 class="text-theme-muted">F1-Score</h6>
+                                <h4>{{ "%.1f"|format(metrics.f1) }}%</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="alert alert-info">No model metrics yet. Retrain will populate after incremental learning.</div>
+        {% endif %}
+        <a href="{{ url_for('dashboard') }}" class="btn btn-outline-theme">Back to Dashboard</a>
+    </div>
+</div>
+{% endblock %}
