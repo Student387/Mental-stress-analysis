@@ -8,6 +8,7 @@ import functools
 import joblib
 from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify, send_file
+from werkzeug.middleware.proxy_fix import ProxyFix
 from io import BytesIO
 
 from config import MODEL_PATH, SCALER_PATH, STRESS_LEVEL_LABELS
@@ -24,6 +25,7 @@ from utils.user_management import (
 from utils.retrain import append_user_data, load_model_metrics
 
 app = Flask(__name__)
+app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 app.secret_key = os.environ.get('SECRET_KEY', 'student-stress-analysis-secret-key-2024')
 
 _model = None
