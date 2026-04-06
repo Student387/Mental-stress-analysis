@@ -12,25 +12,6 @@
             </div>
         </div>
 
-        <div class="card shadow-sm border-0 mb-4">
-            <div class="card-header bg-white py-3">
-                <h5 class="mb-0 text-theme-primary"><i class="bi bi-diagram-3 me-2"></i>AI Decision Factors</h5>
-            </div>
-            <div class="card-body">
-                <p class="text-muted small">This chart shows which student answers are most influential in the AI's stress prediction logic.</p>
-                <div style="height: 400px;">
-                    <canvas id="adminImportanceChart"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <script id="admin-importance-data" type="application/json">
-            {{ feature_importance | default({}) | tojson | safe }}
-        </script>
-        {% else %}
-        <!-- <div class="alert alert-info">No model metrics yet. Retrain will populate after incremental learning.</div>     -->
-        {% endif %}
-        {% if feature_importance %}
 <div class="card shadow-sm border-0 mb-4">
     <div class="card-header bg-white py-3">
         <h5 class="mb-0 text-theme-primary"><i class="bi bi-diagram-3 me-2"></i>Global Feature Importance</h5>
