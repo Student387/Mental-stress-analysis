@@ -387,8 +387,12 @@ def admin():
     feature_importance = {}
     
     if model and hasattr(model, 'feature_importances_'): #
+        from config import MODEL_PATH
+        print(f"\n[DEBUG] App is loading model from: {MODEL_PATH}")
+        print(f"[DEBUG] The model has {model.n_features_in_} features.\n")
         from config import FEATURE_COLUMNS
         importances = model.feature_importances_
+        
         # Map feature names to their importance values
         raw_importance = {name: float(imp) for name, imp in zip(FEATURE_COLUMNS, importances)}
         # Sort and take top 10
