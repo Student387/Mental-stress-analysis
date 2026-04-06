@@ -4,32 +4,26 @@
 <div class="row justify-content-center">
     <div class="col-lg-8">
         <h2 class="mb-4"><i class="bi bi-speedometer2 text-theme-primary me-2"></i>Model Performance</h2>
-        {% if metrics %}
+        
         <div class="card shadow-sm border-0 mb-4">
-            
-                    </div>
+            <div class="card-header bg-white py-3">
+                <h5 class="mb-0 text-theme-primary"><i class="bi bi-diagram-3 me-2"></i>Global Feature Importance</h5>
+            </div>
+            <div class="card-body">
+                <div style="height: 400px;">
+                    <canvas id="adminImportanceChart"></canvas>
                 </div>
             </div>
         </div>
 
-<div class="card shadow-sm border-0 mb-4">
-    <div class="card-header bg-white py-3">
-        <h5 class="mb-0 text-theme-primary"><i class="bi bi-diagram-3 me-2"></i>Global Feature Importance</h5>
-    </div>
-    <div class="card-body">
-        <div style="height: 400px;">
-            <canvas id="adminImportanceChart"></canvas>
-        </div>
-    </div>
-</div>
-
-<script id="admin-importance-data" type="application/json">
-    {{ feature_importance | tojson | safe }}
-</script>
-{% endif %}
+        <script id="admin-importance-data" type="application/json">
+            {{ feature_importance | tojson | safe }}
+        </script>
+        
         <a href="{{ url_for('dashboard') }}" class="btn btn-outline-theme">Back to Dashboard</a>
     </div>
 </div>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     let importanceData = {};
