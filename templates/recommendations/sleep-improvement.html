@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Sleep Improvement - Student Mental Stress Analysis{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-9">
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('questionnaire') }}">Assessment</a></li>
+                <li class="breadcrumb-item active">Sleep Improvement</li>
+            </ol>
+        </nav>
+
+        <div class="card shadow-sm border-0 mb-4 overflow-hidden">
+            <div class="card-header py-4 text-white" style="background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);">
+                <h2 class="mb-0"><i class="bi bi-moon-stars me-3"></i>Sleep Improvement</h2>
+                <p class="mb-0 mt-2 opacity-90">Sleep hygiene practices for better rest and mental health</p>
+            </div>
+            <div class="card-body p-4 p-md-5">
+                <p class="lead text-theme-muted">Quality sleep is essential for cognitive function, emotional regulation, and stress management. Poor sleep can worsen stress and anxiety.</p>
+
+                <h5 class="mt-4 mb-3">Sleep Hygiene Guidelines</h5>
+                <ul>
+                    <li><strong>Consistent Schedule:</strong> Go to bed and wake up at the same time each day, including weekends.</li>
+                    <li><strong>Screen-Free Hour:</strong> Avoid screens (phones, laptops) at least 1 hour before sleep.</li>
+                    <li><strong>Environment:</strong> Keep your room cool, dark, and quiet.</li>
+                    <li><strong>Limit Caffeine:</strong> Avoid caffeine after 2 PM.</li>
+                    <li><strong>No Heavy Meals:</strong> Avoid large meals close to bedtime.</li>
+                </ul>
+
+                <h5 class="mt-4 mb-3">Additional Tips</h5>
+                <ul>
+                    <li>Expose yourself to natural light during the day</li>
+                    <li>Use relaxation techniques (e.g., deep breathing) before bed</li>
+                    <li>Reserve your bed for sleep only; avoid studying in bed</li>
+                </ul>
+
+                <h5 class="mt-4 mb-3">Helpful Resources</h5>
+                <ul>
+                    <li><a href="https://www.sleepfoundation.org/sleep-hygiene" target="_blank" rel="noopener noreferrer">Sleep Foundation</a> – Evidence-based sleep hygiene tips</li>
+                    <li><a href="https://www.calm.com" target="_blank" rel="noopener noreferrer">Calm</a> – Sleep stories and wind-down exercises</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="d-flex flex-wrap gap-2">
+            <a href="{{ url_for('dashboard') }}" class="btn btn-primary">Back to Dashboard</a>
+            <a href="{{ url_for('questionnaire') }}" class="btn btn-outline-theme">Retake Assessment</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% block title %}Home - Student Mental Stress Analysis System{% endblock %}
+{% block main_class %}p-0{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section py-5">
+    <div class="container py-5">
+        <div class="row align-items-center">
+            <div class="col-lg-7">
+                <h1 class="hero-title display-4 fw-bold mb-3 text-theme-dark">
+                    Student Mental Stress Analysis System
+                </h1>
+                <p class="hero-subtitle lead text-theme-muted mb-4">
+                    An ML-powered assessment tool designed to help students understand their stress levels 
+                    and receive personalized recommendations for better mental wellness.
+                </p>
+                <div class="d-flex flex-wrap gap-3">
+                    <a href="{{ url_for('questionnaire') }}" class="btn btn-primary btn-lg px-4 py-3 shadow-sm">
+                        <i class="bi bi-clipboard2-pulse me-2"></i>Start Stress Assessment
+                    </a>
+                    <a href="#about" class="btn btn-outline-theme btn-lg px-4 py-3">
+                        <i class="bi bi-info-circle me-2"></i>Learn More
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-5 mt-5 mt-lg-0 text-center">
+                <div class="hero-image-placeholder rounded-4 shadow-lg overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=600&h=400&fit=crop" 
+                         alt="Mental wellness - calm and focused student" class="img-fluid">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5 bg-light">
+    <div class="container py-4">
+        <div class="text-center mb-5">
+            <h2 class="section-title fw-bold text-theme-dark mb-2">Key Features</h2>
+            <p class="text-theme-muted">Comprehensive stress assessment with actionable insights</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-4">
+                <div class="card feature-card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="feature-icon mb-3 rounded-3 bg-theme-primary-subtle p-3 d-inline-block">
+                            <i class="bi bi-cpu text-theme-primary fs-3"></i>
+                        </div>
+                        <h5 class="card-title fw-semibold text-theme-dark">ML-Powered Analysis</h5>
+                        <p class="card-text text-theme-muted small">Trained machine learning model evaluates multiple factors to assess stress levels accurately.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="card feature-card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="feature-icon mb-3 rounded-3 bg-theme-success-subtle p-3 d-inline-block">
+                            <i class="bi bi-person-check text-theme-success fs-3"></i>
+                        </div>
+                        <h5 class="card-title fw-semibold text-theme-dark">Personalized Recommendations</h5>
+                        <p class="card-text text-theme-muted small">Tailored suggestions based on your responses: meditation, sleep, study planning, and more.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="card feature-card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="feature-icon mb-3 rounded-3 bg-theme-primary-subtle p-3 d-inline-block">
+                            <i class="bi bi-file-earmark-bar-graph text-theme-primary fs-3"></i>
+                        </div>
+                        <h5 class="card-title fw-semibold text-theme-dark">Detailed Reports</h5>
+                        <p class="card-text text-theme-muted small">Download formal reports with analysis summary, action plans, and precautions.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- About Section -->
+<section id="about" class="py-5">
+    <div class="container py-4">
+        <div class="row align-items-center">
+            <div class="col-lg-5 mb-4 mb-lg-0">
+                <div class="about-image rounded-4 overflow-hidden shadow">
+                    <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=500&h=400&fit=crop" 
+                         alt="Students collaborating - mental wellness" class="img-fluid">
+                </div>
+            </div>
+            <div class="col-lg-7">
+                <h2 class="section-title fw-bold text-theme-dark mb-3">About the System</h2>
+                <p class="text-theme-muted mb-3">
+                    The Student Mental Stress Analysis System is a Final Year Project designed to support 
+                    student mental wellness through data-driven assessment. The system evaluates 20 factors 
+                    including anxiety, sleep quality, academic load, social support, and environmental conditions.
+                </p>
+                <p class="text-theme-muted mb-3">
+                    Using a trained machine learning model, the system provides stress level classification 
+                    (Low, Medium, High) with confidence scores and probability distributions. Results include 
+                    a detailed analysis of contributing factors and personalized recommendations for improvement.
+                </p>
+                <ul class="list-unstyled">
+                    <li class="mb-2"><i class="bi bi-check2-circle text-theme-success me-2"></i>Confidential and anonymous assessment</li>
+                    <li class="mb-2"><i class="bi bi-check2-circle text-theme-success me-2"></i>Evidence-based recommendations</li>
+                    <li class="mb-2"><i class="bi bi-check2-circle text-theme-success me-2"></i>Resources for meditation, sleep, and support</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-5 bg-theme-primary">
+    <div class="container text-center py-4">
+        <h2 class="fw-bold text-white mb-3">Ready to Assess Your Stress Level?</h2>
+        <p class="text-white-50 mb-4">Take the questionnaire and receive personalized recommendations in minutes.</p>
+        <a href="{{ url_for('questionnaire') }}" class="btn btn-light btn-lg px-5 py-3 shadow">
+            <i class="bi bi-clipboard2-pulse me-2"></i>Start Assessment Now
+        </a>
+    </div>
+</section>
+
+<!-- Footer note for precautions -->
+<section class="py-3 bg-light border-top">
+    <div class="container">
+        <p class="text-center text-theme-muted small mb-0">
+            <strong>Important:</strong> This tool does not replace professional mental health evaluation. 
+            If you experience persistent distress, please seek help from a qualified healthcare provider or counselor.
+        </p>
+    </div>
+</section>
+{% endblock %}

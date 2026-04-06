@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Study Planning - Student Mental Stress Analysis{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-9">
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('questionnaire') }}">Assessment</a></li>
+                <li class="breadcrumb-item active">Study Planning</li>
+            </ol>
+        </nav>
+
+        <div class="card shadow-sm border-0 mb-4 overflow-hidden">
+            <div class="card-header bg-theme-primary py-4 text-white">
+                <h2 class="mb-0"><i class="bi bi-journal-text me-3"></i>Study Planning</h2>
+                <p class="mb-0 mt-2 opacity-90">Effective strategies to manage academic workload and reduce stress</p>
+            </div>
+            <div class="card-body p-4 p-md-5">
+                <p class="lead text-theme-muted">A well-structured study plan can significantly reduce academic stress by breaking tasks into manageable segments and promoting consistent progress.</p>
+
+                <h5 class="mt-4 mb-3">Key Strategies</h5>
+                <ul>
+                    <li><strong>Pomodoro Technique:</strong> Work for 25 minutes, then take a 5-minute break. After four cycles, take a longer break.</li>
+                    <li><strong>Chunking:</strong> Break large assignments into smaller, actionable tasks.</li>
+                    <li><strong>Prioritization:</strong> Use to-do lists and prioritize by deadline and importance.</li>
+                    <li><strong>Time Blocking:</strong> Allocate specific time slots for studying, rest, and other activities.</li>
+                </ul>
+
+                <h5 class="mt-4 mb-3">Tips</h5>
+                <ul>
+                    <li>Set realistic goals for each study session</li>
+                    <li>Avoid cramming; spread learning over time</li>
+                    <li>Create a dedicated study space free from distractions</li>
+                </ul>
+
+                <h5 class="mt-4 mb-3">Helpful Resources</h5>
+                <ul>
+                    <li><a href="https://pomofocus.io" target="_blank" rel="noopener noreferrer">Pomofocus</a> – Free Pomodoro timer</li>
+                    <li><a href="https://todoist.com" target="_blank" rel="noopener noreferrer">Todoist</a> – Task management app</li>
+                    <li><a href="https://toggl.com" target="_blank" rel="noopener noreferrer">Toggl</a> – Time tracking for productivity</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="d-flex flex-wrap gap-2">
+            <a href="{{ url_for('dashboard') }}" class="btn btn-primary">Back to Dashboard</a>
+            <a href="{{ url_for('questionnaire') }}" class="btn btn-outline-theme">Retake Assessment</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

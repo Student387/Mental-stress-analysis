@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Meditation & Mindfulness - Student Mental Stress Analysis{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-9">
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('questionnaire') }}">Assessment</a></li>
+                <li class="breadcrumb-item active">Meditation & Mindfulness</li>
+            </ol>
+        </nav>
+
+        <div class="card shadow-sm border-0 mb-4 overflow-hidden">
+            <div class="card-header bg-theme-success py-4 text-white">
+                <h2 class="mb-0"><i class="bi bi-heart-pulse me-3"></i>Meditation & Mindfulness</h2>
+                <p class="mb-0 mt-2 opacity-90">Evidence-based practices for stress reduction and mental clarity</p>
+            </div>
+            <div class="card-body p-4 p-md-5">
+                <p class="lead text-theme-muted">Meditation and mindfulness techniques have been scientifically shown to reduce stress, improve focus, and enhance overall well-being among students.</p>
+
+                <h5 class="mt-4 mb-3">Benefits</h5>
+                <ul>
+                    <li>Reduces anxiety and stress hormones</li>
+                    <li>Improves concentration and academic performance</li>
+                    <li>Enhances emotional regulation</li>
+                    <li>Promotes better sleep quality</li>
+                </ul>
+
+                <h5 class="mt-4 mb-3">Getting Started</h5>
+                <p>Begin with 5–10 minutes daily. Find a quiet space, sit comfortably, and focus on your breath. When your mind wanders, gently redirect attention back to your breathing.</p>
+
+                <h5 class="mt-4 mb-3">Helpful Resources</h5>
+                <ul>
+                    <li><a href="https://www.headspace.com" target="_blank" rel="noopener noreferrer">Headspace</a> – Guided meditation app with student discounts</li>
+                    <li><a href="https://www.calm.com" target="_blank" rel="noopener noreferrer">Calm</a> – Sleep stories, meditation, and breathing exercises</li>
+                    <li><a href="https://www.mindful.org/meditation/mindfulness-getting-started/" target="_blank" rel="noopener noreferrer">Mindful.org</a> – Free mindfulness guides</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="d-flex flex-wrap gap-2">
+            <a href="{{ url_for('dashboard') }}" class="btn btn-primary">Back to Dashboard</a>
+            <a href="{{ url_for('questionnaire') }}" class="btn btn-outline-theme">Retake Assessment</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Emergency Help - Student Mental Stress Analysis{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-9">
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('questionnaire') }}">Assessment</a></li>
+                <li class="breadcrumb-item active">Emergency Help</li>
+            </ol>
+        </nav>
+
+        <div class="card shadow-sm border-danger mb-4 overflow-hidden">
+            <div class="card-header bg-danger py-4 text-white">
+                <h2 class="mb-0"><i class="bi bi-telephone-fill me-3"></i>Emergency Help & Crisis Resources</h2>
+                <p class="mb-0 mt-2 opacity-90">If you or someone you know is in crisis, please reach out immediately</p>
+            </div>
+            <div class="card-body p-4 p-md-5">
+                <div class="alert alert-warning mb-4">
+                    <strong>Important:</strong> This system does not provide emergency services. If you are in immediate danger or experiencing a mental health crisis, please contact emergency services or a crisis helpline.
+                </div>
+
+                <h5 class="mb-3">Crisis Helplines (24/7)</h5>
+                <ul class="list-unstyled">
+                    <li class="mb-3">
+                        <strong>National Suicide Prevention Lifeline (US)</strong><br>
+                        <a href="tel:1-800-273-8255">1-800-273-8255</a> &bull; <a href="https://988lifeline.org" target="_blank" rel="noopener noreferrer">988lifeline.org</a>
+                    </li>
+                    <li class="mb-3">
+                        <strong>Crisis Text Line</strong><br>
+                        Text HOME to <a href="sms:741741">741741</a> &bull; <a href="https://www.crisistextline.org" target="_blank" rel="noopener noreferrer">crisistextline.org</a>
+                    </li>
+                    <li class="mb-3">
+                        <strong>International Association for Suicide Prevention</strong><br>
+                        <a href="https://www.iasp.info/resources/Crisis_Centres/" target="_blank" rel="noopener noreferrer">Find a crisis center near you</a>
+                    </li>
+                </ul>
+
+                <h5 class="mt-4 mb-3">When to Seek Immediate Help</h5>
+                <ul>
+                    <li>Thoughts of self-harm or suicide</li>
+                    <li>Severe anxiety or panic that feels unmanageable</li>
+                    <li>Inability to perform daily activities</li>
+                    <li>Withdrawal from social contact for an extended period</li>
+                </ul>
+
+                <h5 class="mt-4 mb-3">Campus Resources</h5>
+                <p>Many universities offer 24/7 crisis support. Check your institution's health services or counseling center website for local emergency contacts.</p>
+            </div>
+        </div>
+
+        <div class="d-flex flex-wrap gap-2">
+            <a href="{{ url_for('dashboard') }}" class="btn btn-primary">Back to Dashboard</a>
+            <a href="{{ url_for('recommendation', topic='personal-support') }}" class="btn btn-outline-theme">Personal Support</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
