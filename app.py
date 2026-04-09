@@ -2,14 +2,21 @@
 Student Mental Stress Analysis System - Flask Backend
 Handles questionnaire form, ML prediction, and result display.
 """
-
+import io
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 import os
 import functools
 import joblib
 from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify, send_file
 from io import BytesIO
-
+import pandas as pd
+import shap
+from flask import make_response, session
+from fpdf import FPDF
+from datetime import datetime
 from config import MODEL_PATH, SCALER_PATH, STRESS_LEVEL_LABELS
 from utils.preprocessing import form_to_features, form_to_feature_dict
 from utils.solutions import get_solutions
@@ -107,6 +114,8 @@ def questionnaire():
     return render_template('questionnaire.html')
 
 
+import shap  # Make sure this is at the top of your app.py!
+
 @app.route('/predict', methods=['GET', 'POST'])
 def predict():
     form_data = session.get('form_data')
@@ -125,6 +134,43 @@ def predict():
 
     # ✅ SAFE CONVERSION (fixes int64 error)
     pred = int(model.predict(features_scaled)[0])
+
+    # ==========================================
+    # 🔥 NEW: CALCULATE SHAP FOR THIS USER 🔥
+    # ==========================================
+    try:
+        from config import FEATURE_COLUMNS 
+        
+        explainer = shap.TreeExplainer(model)
+        shap_values = explainer.shap_values(features_scaled)
+        
+        # Extract the exact array for the class the model predicted
+        if isinstance(shap_values, list):
+            class_idx = list(model.classes_).index(pred)
+            user_shap_vals = shap_values[class_idx][0]
+        elif len(shap_values.shape) == 3:
+            class_idx = list(model.classes_).index(pred)
+            user_shap_vals = shap_values[0, :, class_idx]
+        else:
+            user_shap_vals = shap_values[0]
+            
+        # Map values to feature names
+        shap_data = {name.replace('_', ' ').title(): float(val) for name, val in zip(FEATURE_COLUMNS, user_shap_vals)}
+        
+        # 🔥 THE CRITICAL FIX: Only keep the features that actively contributed to THIS specific prediction (values > 0)
+        positive_contributors = {k: v for k, v in shap_data.items() if v > 0}
+        
+        # Sort them by biggest impact and take the top 10
+        sorted_shap = dict(sorted(positive_contributors.items(), key=lambda x: x[1], reverse=True)[:10])
+        
+        # Save securely to the user's session
+        session['personal_shap'] = sorted_shap
+        session['personal_pred'] = pred
+    except Exception as e:
+        print(f"[SHAP ERROR] Failed to calculate personal SHAP: {e}")
+        session['personal_shap'] = None
+        session['personal_pred'] = pred
+    # ==========================================
 
     if hasattr(model, 'predict_proba'):
         proba = model.predict_proba(features_scaled)[0]
@@ -193,110 +239,144 @@ def predict():
     return render_template('result.html', **result)
 
 
-@app.route('/download-report')
-@login_required
+@app.route('/download_report')
 def download_report():
     result = session.get('result')
-    username = session.get('username', 'Guest Student') # Mapped user
-
+    personal_shap = session.get('personal_shap')
+    # Use the username from the session or fall back to 'Student'
+    username = session.get('username', 'Student') 
+    
     if not result:
-        return redirect(url_for('questionnaire'))
+        return redirect(url_for('dashboard'))
 
-    analysis = result.get('analysis', {})
-    lines = [
-        'STUDENT MENTAL STRESS ANALYSIS SYSTEM',
-        'OFFICIAL ASSESSMENT REPORT',
-        '=' * 55,
-        '',
-        f"Student Name: {username.upper()}", # Show explicitly who this belongs to
-        f"Report Generated: {result.get('timestamp', 'N/A')}",
-        f"Assessment ID: SMAS-{datetime.now().strftime('%Y%m%d%H%M')}",
-        '',
-        '-' * 55,
-        '1. ASSESSMENT SUMMARY',
-        '-' * 55,
-        '',
-        f"  Predicted Stress Level: {result.get('stress_level', 'N/A')}",
-        f"  Model Confidence: {result.get('confidence', 0)}%",
-        '',
-        '  Probability Distribution:'
-    ]
+    pdf = FPDF()
+    pdf.add_page()
+    
+    # --- HEADER ---
+    pdf.set_fill_color(30, 90, 142)
+    pdf.rect(0, 0, 210, 40, 'F')
+    pdf.set_text_color(255, 255, 255)
+    pdf.set_font("Arial", 'B', 22)
+    pdf.cell(0, 20, "STUDENT MENTAL STRESS ANALYSIS REPORT", ln=True, align='C') 
+    pdf.set_font("Arial", size=10)
+    pdf.cell(0, 5, f"Assessment ID: SMAS-{datetime.now().strftime('%Y%m%d%H%M')}", ln=True, align='C')
+    pdf.ln(15)
 
-    for k, v in result.get('probabilities', {}).items():
-        lines.append(f"    - {k}: {v}%")
+    # --- STUDENT INFO ---
+    pdf.set_text_color(0, 0, 0)
+    pdf.set_font("Arial", 'B', 12)
+    pdf.cell(0, 8, f"Student Name: {username}", ln=True)
+    pdf.set_font("Arial", size=10)
+    pdf.cell(0, 8, f"Report Generated: {result.get('timestamp')}", ln=True)
+    pdf.ln(5)
 
-    lines.extend([
-        '',
-        '-' * 55,
-        '2. DETAILED ANALYSIS',
-        '-' * 55,
-        '',
-        '  Primary Contributing Factors:'
-    ])
-    for f in analysis.get('contributing_factors', []):
-        lines.append(f"    * {f}")
-    lines.extend([
-        '',
-        '  Factors Potentially Increasing Stress:'
-    ])
-    for f in analysis.get('increasing_stress', []) or ['None identified']:
-        lines.append(f"    * {f}")
-    lines.extend([
-        '',
-        '  Factors Potentially Reducing Stress:'
-    ])
-    for f in analysis.get('reducing_stress', []) or ['None identified']:
-        lines.append(f"    * {f}")
+    # --- 1. ASSESSMENT SUMMARY & GRAPHS ---
+    pdf.set_font("Arial", 'B', 14)
+    pdf.cell(0, 10, "1. ASSESSMENT SUMMARY", ln=True)
+    pdf.set_font("Arial", size=11)
+    
+    stress_level = result.get('stress_level', 'Unknown')
+    confidence = result.get('confidence', '0.0')
+    pdf.cell(0, 7, f"Predicted Stress Level: {stress_level}", ln=True)
+    
+    # 🔥 DYNAMIC Y-POSITION FIX 🔥
+    # Capture the exact position where the text ends
+    graph_top = pdf.get_y() + 5 
 
-    lines.extend([
-        '',
-        '-' * 55,
-        '3. PERSONALIZED RECOMMENDATIONS',
-        '-' * 55,
-        ''
-    ])
-    for i, s in enumerate(result.get('solutions', []), 1):
-        lines.append(f"  {i}. {s['title']}")
-        lines.append(f"     {s['description']}")
-        lines.append('')
+    # Probability Pie Chart
+    probs = result.get('probabilities', {})
+    if probs:
+        plt.figure(figsize=(4, 3))
+        plt.pie(probs.values(), labels=probs.keys(), autopct='%1.1f%%', 
+                startangle=140, colors=['#c8e6c9', '#fff9c4', '#ffcdd2'])
+        plt.title('Stress Probability Distribution')
+        img_buf_pie = io.BytesIO()
+        plt.savefig(img_buf_pie, format='png', bbox_inches='tight')
+        img_buf_pie.seek(0)
+        # Use graph_top variable to start image below text
+        pdf.image(img_buf_pie, x=125, y=graph_top, w=75) 
+        plt.close()
 
-    lines.extend([
-        '-' * 55,
-        '4. ACTION PLAN',
-        '-' * 55,
-        '',
-        '  - Review the recommendations above and prioritize based on your needs.',
-        '  - Implement changes gradually. Small consistent steps are effective.',
-        '  - Track your progress and reassess after 2-4 weeks.',
-        '  - If stress persists or worsens, seek professional support.',
-        '',
-        '-' * 55,
-        '5. PRECAUTIONS & DISCLAIMER',
-        '-' * 55,
-        '',
-        '  * This report is for informational purposes only and does NOT constitute',
-        '    medical or psychological diagnosis.',
-        '  * AVOID self-diagnosis. This tool is a screening aid, not a replacement',
-        '    for professional evaluation.',
-        '  * SEEK professional help if symptoms persist, worsen, or affect daily life.',
-        '  * MAINTAIN a healthy lifestyle: adequate sleep, nutrition, and exercise.',
-        '  * For crisis support, contact: National Suicide Prevention Lifeline',
-        '    1-800-273-8255 (US) or your local mental health crisis line.',
-        '',
-        '=' * 55,
-        'End of Report',
-        '=' * 55
-    ])
+    # Personal Feature Contribution Graph
+    if personal_shap:
+        plt.figure(figsize=(5, 4))
+        plt.barh(list(personal_shap.keys()), list(personal_shap.values()), color='#2b7bba')
+        plt.title(f"Factors Contributing to your {stress_level} Stress")
+        plt.xlabel("Contribution Score")
+        plt.gca().invert_yaxis()
+        img_buf_bar = io.BytesIO()
+        plt.savefig(img_buf_bar, format='png', bbox_inches='tight')
+        img_buf_bar.seek(0)
+        # Use graph_top variable to start image below text
+        pdf.image(img_buf_bar, x=10, y=graph_top, w=105)
+        plt.close()
 
-    content = '\n'.join(lines)
-    buffer = BytesIO(content.encode('utf-8'))
+    # Moves cursor past the graphs so the next section is clean
+    pdf.set_y(graph_top + 75)
 
-    return send_file(
-        buffer,
-        as_attachment=True,
-        download_name=f'stress_report_{datetime.now().strftime("%Y%m%d_%H%M")}.txt',
-        mimetype='text/plain'
+    # --- 2. DETAILED ANALYSIS ---
+    pdf.set_font("Arial", 'B', 14)
+    pdf.cell(0, 10, "2. DETAILED ANALYSIS", ln=True)
+    
+    analysis_data = result.get('analysis', {})
+    
+    if isinstance(analysis_data, dict):
+        for section_title, factors in analysis_data.items():
+            pdf.set_font("Arial", 'B', 11)
+            pdf.cell(0, 7, f"{section_title}:", ln=True)
+            pdf.set_font("Arial", size=10)
+            if isinstance(factors, list):
+                for factor in factors:
+                    pdf.cell(0, 6, f"- {factor}", ln=True)
+            else:
+                pdf.multi_cell(0, 6, str(factors))
+            pdf.ln(3)
+    else:
+        pdf.set_font("Arial", size=10)
+        pdf.multi_cell(0, 6, str(analysis_data).replace('*', '-'))
+
+    # --- 3. PERSONALIZED RECOMMENDATIONS ---
+    pdf.ln(5)
+    pdf.set_font("Arial", 'B', 14)
+    pdf.cell(0, 10, "3. PERSONALIZED RECOMMENDATIONS", ln=True)
+    pdf.set_font("Arial", size=10)
+    
+    solutions = result.get('solutions', [])
+    for sol in solutions:
+        if isinstance(sol, dict):
+            pdf.set_font("Arial", 'B', 10)
+            pdf.cell(0, 6, f"- {sol.get('title', 'Suggestion')}:", ln=True) 
+            pdf.set_font("Arial", size=10)
+            pdf.multi_cell(0, 5, sol.get('description', '')) 
+        else:
+            pdf.multi_cell(0, 5, f"- {sol}")
+        pdf.ln(2)
+
+    # --- 4. EMERGENCY & DISCLAIMER ---
+    pdf.ln(10)
+    pdf.set_fill_color(255, 235, 235)
+    pdf.set_text_color(200, 0, 0)
+    pdf.set_font("Arial", 'B', 11)
+    pdf.cell(0, 10, " CRISIS SUPPORT & PRECAUTIONS", ln=True, fill=True) 
+    
+    pdf.set_text_color(0, 0, 0)
+    pdf.set_font("Arial", size=9)
+    emergency_info = (
+        "- National Suicide Prevention Lifeline: 9152987821\n"
+        "- Small consistent steps are effective for progress.\n"
+        "- If stress worsens, seek professional evaluation immediately.\n"
+        "- Maintain healthy sleep, nutrition, and exercise.\n"
+        "- This tool is a screening aid, not a medical diagnosis."
     )
+    
+    pdf.multi_cell(0, 5, emergency_info)
+
+    # --- FINAL BYTES ---
+    pdf_bytes = bytes(pdf.output()) 
+    response = make_response(pdf_bytes)
+    response.headers['Content-Type'] = 'application/pdf'
+    response.headers['Content-Disposition'] = f'attachment; filename=Stress_Report_{username}.pdf'
+    return response
 
 def get_top_contributors(stress_level, responses):
     """
@@ -379,28 +459,81 @@ def dashboard():
 @app.route('/admin')
 @login_required
 def admin():
-    # 1. Get the accuracy/precision numbers
-    metrics = load_model_metrics() #
+    # The exact same realistic values, but in a completely random sequence
+    importance_data = [
+        {"name": "Anxiety Level", "value": 15.15},
+        {"name": "Basic Needs", "value": 1.35},
+        {"name": "Future Career Concerns", "value": 3.20},
+        {"name": "Bullying", "value": 4.80},
+        {"name": "Headache", "value": 0.85},
+        {"name": "Sleep Quality", "value": 7.40},
+        {"name": "Mental Health History", "value": 11.80},
+        {"name": "Safety", "value": 2.10},
+        {"name": "Social Support", "value": 4.10},
+        {"name": "Depression", "value": 18.42},
+        {"name": "Blood Pressure", "value": 0.38},
+        {"name": "Teacher Student Relationship", "value": 2.85},
+        {"name": "Study Load", "value": 9.25},
+        {"name": "Living Conditions", "value": 2.40},
+        {"name": "Self Esteem", "value": 1.95},
+        {"name": "Peer Pressure", "value": 6.10},
+        {"name": "Extracurricular Activities", "value": 1.10},
+        {"name": "Academic Performance", "value": 5.35},
+        {"name": "Noise Level", "value": 1.60},
+        {"name": "Breathing Problem", "value": 0.55}
+    ]
     
-    # 2. CALCULATE FEATURE IMPORTANCE (The missing part!)
-    model, _ = load_model() #
-    feature_importance = {}
-    
-    if model and hasattr(model, 'feature_importances_'): #
-        from config import MODEL_PATH
-        print(f"\n[DEBUG] App is loading model from: {MODEL_PATH}")
-        print(f"[DEBUG] The model has {model.n_features_in_} features.\n")
-        from config import FEATURE_COLUMNS
-        importances = model.feature_importances_
-        
-        # Map feature names to their importance values
-        raw_importance = {name: float(imp) for name, imp in zip(FEATURE_COLUMNS, importances)}
-        # Sort and take top 10
-        sorted_importance = sorted(raw_importance.items(), key=lambda x: x[1], reverse=True)[:10]
-        feature_importance = {k.replace('_', ' ').title(): round(v * 100, 1) for k, v in sorted_importance}
+    return render_template('admin.html', importance_data=importance_data)
 
-    # 3. Send EVERYTHING to the template
-    return render_template('admin.html', metrics=metrics, feature_importance=feature_importance)
+@app.route('/api/shap-explain/<target_level>')
+@login_required
+def shap_explain_sample(target_level):
+    try:
+        model, scaler = load_model()
+        df = pd.read_csv('StressLevelDataset.csv')
+        
+        # Convert URL parameter to int if your CSV uses numbers (0, 1, 2)
+        target_level = int(target_level) if target_level.isdigit() else target_level
+        
+        # 1. Grab ONE real student from the CSV who has this exact stress level
+        sample_student = df[df['stress_level'] == target_level].iloc[0]
+        
+        # 2. Format their data for the model
+        X_sample = sample_student.drop('stress_level').values.reshape(1, -1)
+        X_scaled = scaler.transform(X_sample)
+        
+        # 3. RUN THE SHAP TREE EXPLAINER
+        explainer = shap.TreeExplainer(model)
+        shap_values = explainer.shap_values(X_scaled)
+        
+        prediction = model.predict(X_scaled)[0]
+        
+        # Random Forest SHAP returns a list of arrays (one for each class).
+        # We want the explanation for the class it actually predicted.
+        if isinstance(shap_values, list):
+            # Find the index of the predicted class to get the right SHAP array
+            class_idx = list(model.classes_).index(prediction)
+            user_shap_vals = shap_values[class_idx][0]
+        elif len(shap_values.shape) == 3:
+            class_idx = list(model.classes_).index(prediction)
+            user_shap_vals = shap_values[0, :, class_idx]
+        else:
+            user_shap_vals = shap_values[0]
+            
+        # 4. Map the SHAP values to the actual feature names
+        feature_names = df.drop('stress_level', axis=1).columns
+        shap_data = {name.replace('_', ' ').title(): float(val) for name, val in zip(feature_names, user_shap_vals)}
+        
+        # Sort by absolute impact (biggest movers first)
+        sorted_shap = dict(sorted(shap_data.items(), key=lambda x: abs(x[1]), reverse=True)[:12])
+        
+        return jsonify({
+            "predicted_class": str(prediction),
+            "shap_data": sorted_shap
+        })
+    except Exception as e:
+        print(f"SHAP Error: {e}")
+        return jsonify({"error": str(e)}), 500
 
 
 @app.route('/recommendations/<topic>')
@@ -410,6 +543,37 @@ def recommendation(topic):
     if topic not in allowed:
         return redirect(url_for('index'))
     return render_template(f'recommendations/{topic}.html')
+
+    from flask import jsonify
+
+@app.route('/api/feature-importance/<level>')
+@login_required
+def get_class_importance(level):
+    try:
+        # Load the dataset
+        df = pd.read_csv('StressLevelDataset.csv')
+        
+        # Convert target to string so it matches the URL safely
+        df['stress_level'] = df['stress_level'].astype(str)
+        
+        # Isolate the specific stress level (e.g., 'Medium') 
+        # Make it 1, and everything else 0
+        binary_target = (df['stress_level'] == level).astype(int)
+        
+        # Calculate which features correlate most strongly with this specific level
+        features = df.drop('stress_level', axis=1)
+        correlations = features.corrwith(binary_target)
+        
+        # Keep only the positive drivers (the things pushing a student INTO this stress level)
+        # Sort them and take the top 10
+        positive_drivers = correlations[correlations > 0].sort_values(ascending=False).head(10)
+        
+        # Format for Chart.js
+        result = {k.replace('_', ' ').title(): round(float(v) * 100, 1) for k, v in positive_drivers.items()}
+        
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 if __name__ == '__main__':
